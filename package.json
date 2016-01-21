@@ -1,0 +1,14 @@
+{
+  "name": "bond-actor",
+  "version": "1.0.0",
+  "description": "bond actor architecture",
+  "main": "bond.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Chuanhui Zhang",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.1.1"
+  }
+}
