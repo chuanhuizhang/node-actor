@@ -1,0 +1,15 @@
+{
+  "name": "express-actor",
+  "version": "1.0.0",
+  "description": "build web api server in actor model with express",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Chuanhui Zhang",
+  "license": "ISC",
+  "dependencies": {
+    "cz-actor": "git+https://github.com/cz-Michael/node-actor.git",
+    "express": "^4.13.3"
+  }
+}
