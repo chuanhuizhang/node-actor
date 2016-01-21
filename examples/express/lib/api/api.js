@@ -1,7 +1,10 @@
 (function() {
     var CZ = require('cz-actor');
     var express = require('express');
+    var bodyParser = require('body-parser');
     var app = express();
+
+    var router = express.Router();
 
     var Api = (function() {
         function Api() {
@@ -12,11 +15,11 @@
                         var request = message.request;
                         switch(request.method) {
                             case 'GET':
-                                app.get(request.url, request.handlers);
+                                router.get(request.url, request.handlers);
                                 break;
                             case 'POST':
                             default:
-                                app.post(request.url, request.handlers);
+                                router.post(request.url, request.handlers);
                                 break;
                         }
                         return {success: true};
@@ -28,9 +31,16 @@
 
         Api.prototype.initialize = function() {
             //TODO: Server configuration
+            app.use(bodyParser.urlencoded({
+                limit: '5mb',
+                extended: true
+            }));
+            app.use(bodyParser.json({limit: '5mb'}));
+
+            app.use('/', router);
 
             //TODO: Test endpoint
-            app.get('/', function(req, res, next) {
+            router.get('/', function(req, res, next) {
                 res.json({api: '2.0'});
             });
         }

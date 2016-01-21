@@ -4,14 +4,30 @@
     var mongoose = require('mongoose');
     var db = mongoose.connection;
 
+    var _models = {}
+
     var Db = (function(){
         function Db() {
+            // TODO: errrrrrrrrr, return is not working in asynchronous call, need to add asyn send method in actor lib
             this.actor = CZ.Actor({
                 id: 'dbActor',
                 process: function(sender, message) {
                     if (message.type === 'schema') {
                         var Schema = new mongoose.Schema(message.schema);
-                        return db.model(message.name, Schema);
+                        var model = db.model(message.name, Schema);
+                        _models[message.name] = model;
+                        return model;
+                    } else if (message.type === 'query') {
+                        _models[message.name].find(message.query, function(err, result) {
+                            if (err) throw err;
+                            return result;
+                        });
+                    } else if (message.type === 'create') {
+                        var item = new _models[message.name](message.data);
+                        item.save(function(err, result) {
+                            if (err) throw err;
+                            return item;
+                        });
                     }
                 }
             });
