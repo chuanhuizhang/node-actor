@@ -8,7 +8,7 @@ var CZStream = (function() {
     CZStream.prototype.onLoad = function(fn) {
         this._onLoad = fn;
         return function() {};
-    }
+    };
 
     return CZStream;
 
