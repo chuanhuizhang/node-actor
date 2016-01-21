@@ -1,13 +1,13 @@
-var Bond = require('../src/Bond');
+var CZ = require('../src/cz');
 
-var actorOne = Bond.Actor({
+var actorOne = CZ.Actor({
     id: 'actorOne',
     process: function(sender, message) {
         console.log("actorOne get a message from ", sender, message);
     }
 });
 
-var actorTwo = Bond.Actor({
+var actorTwo = CZ.Actor({
     id: 'actorTwo',
     process: function(sender, message) {
         console.log("actorTwo get a message from ", sender, message);

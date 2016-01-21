@@ -1,4 +1,4 @@
-var BondStream = require('./bondStream');
+var CZStream = require('./czStream');
 var _Promise = require('bluebird');
 
 var _routes = {};
@@ -7,7 +7,7 @@ var Router = (function() {
     function Router() {}
 
     Router.prototype.createRoute = function(id) {
-        _routes[id] = {stream: new BondStream()};
+        _routes[id] = {stream: new CZStream()};
         return _routes[id].stream;
     };
 

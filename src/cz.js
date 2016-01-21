@@ -1,6 +1,6 @@
-var Bond = {
+var CZ = {
     router: require('./router'),
     Actor: require('./actor')
 };
 
-module.exports = Bond;
+module.exports = CZ;

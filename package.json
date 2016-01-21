@@ -1,8 +1,8 @@
 {
-  "name": "bond-actor",
+  "name": "cz-actor",
   "version": "1.0.0",
-  "description": "bond actor architecture",
-  "main": "bond.js",
+  "description": "cz actor architecture",
+  "main": "cz.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
