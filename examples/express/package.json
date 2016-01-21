@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "cz-actor": "git+https://github.com/cz-Michael/node-actor.git",
-    "express": "^4.13.3"
+    "express": "^4.13.3",
+    "mongoose": "^4.3.6"
   }
 }

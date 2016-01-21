@@ -2,6 +2,7 @@
     var CZ = require('cz-actor');
 
     var api = require('../api/api');
+    var db = require('../db/db');
     var user = require('../../mod/user/user');
 
     var Sys = (function(){
@@ -16,7 +17,9 @@
 
         Sys.prototype.start = function() {
             api.start();
+            db.start();
             user.start();
+
         };
 
         return Sys;
