@@ -1,17 +1,19 @@
-var CZStream = (function() {
-    function CZStream() {}
+(function() {
+    var CZStream = (function() {
+        function CZStream() {}
 
-    CZStream.prototype.push = function(payload) {
-        return this._onLoad(payload);
-    };
+        CZStream.prototype.push = function(payload) {
+            return this._onLoad(payload);
+        };
 
-    CZStream.prototype.onLoad = function(fn) {
-        this._onLoad = fn;
-        return function() {};
-    };
+        CZStream.prototype.onLoad = function(fn) {
+            this._onLoad = fn;
+            return function() {};
+        };
 
-    return CZStream;
+        return CZStream;
 
-})();
+    })();
 
-module.exports = CZStream;
+    module.exports = CZStream;
+}).call(this);
