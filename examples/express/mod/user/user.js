@@ -51,10 +51,10 @@
                             var data = req.body;
                             data.created_at = new Date();
                             this.actor.send('dbActor', {type: 'create', name: 'User', data: data}).then(function(results) {
-                                console.log(results);
-                                res.json({success: true, users: results});
+                                res.json({success: true, user: results});
                             }, function(err) {
                                 res.status(500);
+                                res.json({success: false});
                             });
                         }.bind(this)
                     ]

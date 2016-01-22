@@ -3,6 +3,8 @@
 
     var api = require('../api/api');
     var db = require('../db/db');
+    var client = require('../../mod/client/client');
+    var oauth = require('../../mod/oauth/oauth');
     var user = require('../../mod/user/user');
 
     var Sys = (function(){
@@ -18,6 +20,8 @@
         Sys.prototype.start = function() {
             api.start();
             db.start();
+            client.start();
+            oauth.start();
             user.start();
         };
 
