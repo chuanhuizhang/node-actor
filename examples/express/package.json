@@ -9,6 +9,7 @@
   "author": "Chuanhui Zhang",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.14.2",
     "cz-actor": "git+https://github.com/cz-Michael/node-actor.git",
     "express": "^4.13.3",
     "mongoose": "^4.3.6"

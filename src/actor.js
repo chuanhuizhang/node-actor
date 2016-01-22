@@ -21,7 +21,7 @@ var Actor = (function() {
     };
 
     Actor.prototype._doProcess = function(payload) {
-        return payload.callback(null, this.process(payload.sender, payload.message));
+        return this.process(payload.sender, payload.message, payload.promise);
     };
 
     return Actor;

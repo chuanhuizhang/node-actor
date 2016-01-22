@@ -15,15 +15,14 @@
         Router.prototype.send = function(sender, receiver, message) {
             return new _Promise(function(resolve, reject) {
                 var route = _routes[receiver];
-                var callback = function(err, result) {
-                    if (err) return reject(err);
-                    return resolve(result);
-                };
                 var payload = {
                     sender: sender,
                     receiver: receiver,
                     message: message,
-                    callback: callback
+                    promise: {
+                        reject: reject,
+                        resolve: resolve
+                    }
                 };
                 return route.stream.push(payload);
             });
