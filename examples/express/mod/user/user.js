@@ -5,7 +5,7 @@
         function User() {
             this.actor = CZ.Actor({
                 id: 'userActor',
-                process: function(sender, message) {
+                process: function(sender, message, promise) {
                     console.log("userActor get a message from ", sender, message);
                 }
             });

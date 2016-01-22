@@ -10,7 +10,7 @@
         function Api() {
             this.actor = CZ.Actor({
                 id: 'apiActor',
-                process: function(sender, message) {
+                process: function(sender, message, promise) {
                     if (message.type === 'route') {
                         var request = message.request;
                         switch(request.method) {
@@ -22,7 +22,7 @@
                                 router.post(request.url, request.handlers);
                                 break;
                         }
-                        return {success: true};
+                        promise.resolve({success: true});
                     }
                 }
             });

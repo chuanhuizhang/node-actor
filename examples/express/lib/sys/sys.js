@@ -9,7 +9,7 @@
         function Sys() {
             this.actor = CZ.Actor({
                 id: 'sysActor',
-                process: function(sender, message) {
+                process: function(sender, message, promise) {
                     console.log("sysActor get a message from ", sender, message);
                 }
             });
