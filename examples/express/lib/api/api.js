@@ -2,8 +2,11 @@
     var CZ = require('cz-actor');
     var express = require('express');
     var bodyParser = require('body-parser');
-    var app = express();
+    var session = require('express-session');
+    var path = require('path');
+    var ejs = require('ejs');
 
+    var app = express();
     var router = express.Router();
 
     var Api = (function() {
@@ -30,16 +33,28 @@
         }
 
         Api.prototype.initialize = function() {
-            //TODO: Server configuration
+            //Server configuration
+
+            // view engine setup
+            app.set('views', path.join(process.cwd(), 'mod', 'view'));
+            app.set('view engine', 'ejs');
+
             app.use(bodyParser.urlencoded({
                 limit: '5mb',
                 extended: true
             }));
             app.use(bodyParser.json({limit: '5mb'}));
 
+            // Use express session support since OAuth2orize requires it
+            app.use(session({
+              secret: 'Super Secret Session Key',
+              saveUninitialized: true,
+              resave: true
+            }));
+
             app.use('/', router);
 
-            //TODO: Test endpoint
+            //Test endpoint
             router.get('/', function(req, res, next) {
                 res.json({api: '2.0'});
             });

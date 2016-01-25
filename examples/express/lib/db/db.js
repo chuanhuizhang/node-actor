@@ -21,6 +21,11 @@
                             if (err) promise.reject(err);
                             promise.resolve(result);
                         });
+                    } else if (message.type === 'queryOne') {
+                        _models[message.name].findOne(message.query, function(err, result) {
+                            if (err) promise.reject(err);
+                            promise.resolve(result);
+                        });
                     } else if (message.type === 'create') {
                         var item = new _models[message.name](message.data);
                         item.save(function(err, result) {

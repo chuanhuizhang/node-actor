@@ -11,7 +11,10 @@
   "dependencies": {
     "body-parser": "^1.14.2",
     "cz-actor": "git+https://github.com/cz-Michael/node-actor.git",
+    "ejs": "^2.4.1",
     "express": "^4.13.3",
-    "mongoose": "^4.3.6"
+    "express-session": "^1.13.0",
+    "mongoose": "^4.3.6",
+    "oauth2orize": "^1.2.1"
   }
 }

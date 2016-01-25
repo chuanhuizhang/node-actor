@@ -26,11 +26,11 @@
             this.actor = CZ.Actor({
                 id: 'clientActor',
                 process: function(sender, message, promise) {
-                    if (message.type === 'query') {
-                        this.actor.send('dbActor', {type: 'query', name: 'Client', query: {}}).then(function(data) {
-                            console.log(data);
+                    if (message.type === 'queryOne') {
+                        this.actor.send('dbActor', {type: 'queryOne', name: 'Client', query: message.query}).then(function(data) {
+                            promise.resolve(data);
                         }, function(err) {
-                            console.log(err);
+                            promise.reject(err);
                         });
                     } else if (message.type === 'create') {
 
@@ -43,6 +43,7 @@
         Client.prototype.initialize = function() {
             this.schema = {
                 cid: { type: String, unique: true, required: true },
+                code: {type: String, required: false},
                 type: {type: String, required: true},
                 name: {type: String, required: true},
                 public_key: {type: String, unique: true, required: false},
@@ -58,7 +59,7 @@
                     url: '/clients',
                     handlers: [
                         function(req, res, next) {
-                            var data = {
+                            var newClient = {
                                 cid: uid(10),
                                 type: req.body.type,
                                 name: req.body.name,
@@ -67,18 +68,43 @@
 
                             var type = req.body.type;
                             if (type === 'internal') {
-                                data.public_key = uid(32),
-                                data.secret_key = uid(32)
+                                newClient.public_key = uid(32);
+                                newClient.secret_key = uid(32);
                             } else {
-                                data.public_key = req.body.username,
-                                data.secret_key = req.body.password
+                                newClient.public_key = req.body.username;
+                                newClient.secret_key = req.body.password;
                             }
 
-                            this.actor.send('dbActor', {type: 'create', name: 'Client', data: data}).then(function(data) {
-                                res.json({success: true, client: data});
-                            }, function(err) {
-                                res.status(500);
-                            });
+                            if (type === 'internal') {
+                                this.actor.send('oauthActor', {
+                                    type: 'codeCreate',
+                                    data: {
+                                        client: newClient.cid,
+                                        type: 'internal'
+                                    }
+                                }).then(function(codeCreated) {
+                                    newClient.code = codeCreated.value;
+                                    this.actor.send('dbActor', {type: 'create', name: 'Client', data: newClient}).then(function(clientCreated) {
+                                        res.json({success: true, client: clientCreated});
+                                    }, function(err) {
+                                        console.log(err);
+                                        res.status(500);
+                                        res.json({success: false, msg: 'Internal error!'});
+                                    });
+                                }.bind(this), function(err) {
+                                    console.log(err);
+                                    res.status(500);
+                                    res.json({success: false, msg: 'Internal error!'});
+                                })
+                            } else {
+                                this.actor.send('dbActor', {type: 'create', name: 'Client', data: newClient}).then(function(clientCreated) {
+                                    res.json({success: true, client: clientCreated});
+                                }, function(err) {
+                                    console.log(err);
+                                    res.status(500);
+                                    res.json({success: false, msg: 'Internal error!'});
+                                });
+                            }
                         }.bind(this)
                     ]
                 }

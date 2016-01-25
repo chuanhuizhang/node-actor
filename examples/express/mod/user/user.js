@@ -6,8 +6,14 @@
             this.actor = CZ.Actor({
                 id: 'userActor',
                 process: function(sender, message, promise) {
-                    console.log("userActor get a message from ", sender, message);
-                }
+                    if (message.type === 'queryOne') {
+                        this.actor.send('dbActor', {type: 'queryOne', name: 'User', query: message.query}).then(function(data) {
+                            promise.resolve(data);
+                        }, function(err) {
+                            promise.reject(err);
+                        });
+                    }
+                }.bind(this)
             });
             this.initialize();
         }
