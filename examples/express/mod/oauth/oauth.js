@@ -166,9 +166,8 @@
                             callback(err);
                         });
                     } else {
-console.log("exchange for token");
-console.log("exchange: ", redirectUri, authCode.redirect_uri);
-                        //if (client.cid !== authCode.clientId) { return callback(null, false); }
+                        // TODO: response more friendly msg rather than no response
+                        if (client.cid !== authCode.client) { return callback(null, false); }
                         if (redirectUri !== authCode.redirect_uri) { return callback(null, false); }
 
                         // Delete auth code now that it has been used
@@ -183,7 +182,7 @@ console.log("exchange: ", redirectUri, authCode.redirect_uri);
                             var data = {
                                 value: uid(256),
                                 type: 'Access Token',
-                                client: authCode.client,
+                                client: client.cid,
                                 user: authCode.user,
                                 created_at: new Date(),
                                 scope: '*'
@@ -278,16 +277,14 @@ console.log("exchange: ", redirectUri, authCode.redirect_uri);
             };
 
             var authenicateClient = function(req, res, next) {
-                console.log(req.body.public_key, req.body.secret_key);
                 this.actor.send('clientActor', {
                     type: 'queryOne',
                     query: {public_key: req.body.public_key}
                 }).then(function(clientFound) {
                     if (clientFound) {
-console.log(clientFound);
                         if (clientFound.secret_key === req.body.secret_key) {
-                            req.client = clientFound;
-console.log('ok');
+                            // Without using passport, and default is user, so this is the easy way to pass client
+                            req.user = clientFound;
                             next();
                         } else {
                             res.status(401);
