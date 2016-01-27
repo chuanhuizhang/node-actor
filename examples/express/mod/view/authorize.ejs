@@ -1,31 +1,9 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-        <script>
-        $(document).ready(function(){
-            $("#sign-in-btn").click(function(){
-                var email = $('#email').val();
-                var password = $('#password').val();
-                $.post(
-                    "/oauth/signin",
-                    { email: email, password: password }
-                ).done(function( data ) {
-                    $("#firstname").text(data.user.firstname);
-                    $("#sign-in-view").hide();
-                    $("#dialog-view").show();
-                }).fail(function(err) {
-                    console.log(err);
-                    alert(err.responseText);
-                });
-            });
-        });
-        </script>
-    </head>
+    <head></head>
     <body>
-
-        <div id="dialog-view" style="display: none">
-            <p>Hi <span id="firstname"></span>!</p>
+        <div id="dialog-view">
+            <p>Hi <b><%= user.firstname %> <%= user.lastname %></b>!</p>
             <p><b><%= client.name %></b> is requesting <b>full access</b> to your account.</p>
             <p>Do you approve?</p>
 
@@ -36,13 +14,6 @@
               <input type="submit" value="Deny" name="cancel" id="deny">
               </div>
             </form>
-        </div>
-
-        <div id="sign-in-view">
-            Please sign in to authorize <%= client.name %> to access you data!</br>
-            <input type="text" name="email" placeholder="Email" id="email"/><br/>
-            <input type="password" name="password" placeholder="Password" id="password"/></br>
-            <button id="sign-in-btn">Sign In</button>
         </div>
 
     </body>

@@ -97,7 +97,6 @@
 
             server.deserializeClient(function(cid, callback) {
                 this.actor.send('clientActor', {type: 'queryOne', query: {cid: cid} }).then(function(data) {
-                    console.log(data);
                     return callback(null, data);
                 }, function(err) {
                     return callback(err);
@@ -105,12 +104,13 @@
             }.bind(this));
 
             server.grant(oauth2orize.grant.code(function(client, redirectUri, user, ares, callback) {
-console.log(user);
                 var codeNew = {
                     value: uid(16),
-                    clientId: client.cid,
-                    redirectUri: redirectUri,
-                    userId: user._id
+                    type: 'external',
+                    client: client.cid,
+                    redirect_uri: redirectUri,
+                    user: user._id,
+                    created_at: new Date()
                 }
 
                 this.actor.send('dbActor', {type: 'create', name: 'Code', data: codeNew}).then(function(codeCreated) {
@@ -118,10 +118,9 @@ console.log(user);
                 }, function(err) {
                     return callback(err);
                 });
-            }));
+            }.bind(this)));
 
             server.exchange(oauth2orize.exchange.code(function(client, code, redirectUri, callback) {
-
                 this.actor.send('dbActor', {
                     type: 'queryOne',
                     name: 'Code',
@@ -131,7 +130,7 @@ console.log(user);
                 }).then(function(authCode) {
                     if (!authCode) return callback(null, false);
 
-                    if (!client && authCode.type === 'internal') {
+                    if (authCode.type === 'internal') {
                         this.actor.send('dbActor', {
                             type: 'queryOne',
                             name: 'Token',
@@ -167,12 +166,14 @@ console.log(user);
                             callback(err);
                         });
                     } else {
-                        if (client.cid !== authCode.clientId) { return callback(null, false); }
-                        if (redirectUri !== authCode.redirectUri) { return callback(null, false); }
+console.log("exchange for token");
+console.log("exchange: ", redirectUri, authCode.redirect_uri);
+                        //if (client.cid !== authCode.clientId) { return callback(null, false); }
+                        if (redirectUri !== authCode.redirect_uri) { return callback(null, false); }
 
                         // Delete auth code now that it has been used
                         this.actor.send('dbActor', {
-                            type: 'remove',
+                            type: 'removeOne',
                             name: 'Code',
                             query: {
                                 _id: authCode._id
@@ -182,7 +183,7 @@ console.log(user);
                             var data = {
                                 value: uid(256),
                                 type: 'Access Token',
-                                client: client.cid,
+                                client: authCode.client,
                                 user: authCode.user,
                                 created_at: new Date(),
                                 scope: '*'
@@ -209,52 +210,11 @@ console.log(user);
                 });
             }.bind(this)));
 
-            var authorize = [
-                server.authorization(function(clientId, redirectUri, callback) {
-                    this.actor.send('clientActor', {
-                        type: 'queryOne',
-                        query: {cid: clientId}
-                    }).then(function(clientFound) {
-                        return callback(null, clientFound, redirectUri);
-                    }, function(err) {
-                        console.log(err);
-                        callback(err);
-                    });
-                }.bind(this)),
+            var auth = [
                 function(req, res, next) {
-//TODO: Fail to get the user object by customized way to do authentication.
-                    if (req.oauth2.client.type === 'internal') {
-                        res.status(400);
-                        res.json({success: false, msg: 'Internal client do not have to do this!'});
-                    } else {
-                        res.render('authorize', { transactionID: req.oauth2.transactionID, user: req.body.user, client: req.oauth2.client });
-                    }
+                    res.render('signin', {query: req.query});
                 }
             ];
-
-            var internalClientAuthorize = function(req, res, next) {
-                if (req.body.code == 0) {
-                    this.actor.send('clientActor', {
-                        type: 'query',
-                        query: {
-                            type: 'internal',
-                            public_key: req.body.public_key
-                        }
-                    }).then(function(data) {
-                        if (data.length > 0 && data[0].secret_key === req.body.secret_key) {
-                            next(data);
-                        } else {
-                            res.json({success: false, msg: 'The keys you provide are invalid!'});
-                        }
-                    }, function(err) {
-                        console.log(err);
-                        res.status(500);
-                        res.json({success: false, msg: 'Internal error!'});
-                    });
-                } else {
-                    next();
-                }
-            }.bind(this);
 
             var signInHandler = function(req, res, next) {
                 if (req.body.email && req.body.password) {
@@ -265,7 +225,9 @@ console.log(user);
                             return;
                         }
                         if (userFound.password == req.body.password) {
-                            res.json({success: true, user: {firstname: userFound.firstname}});
+                            req.user = userFound;
+                            req.session['user'] = userFound;
+                            next();
                         } else {
                             console.log(userFound.password, req.body.password);
                             res.status(401);
@@ -281,17 +243,91 @@ console.log(user);
                     res.json({success: false, msg: 'Email and password are required!'});
                 }
             }.bind(this);
+
+            var authorize = [
+                signInHandler,
+                server.authorization(function(clientId, redirectUri, callback) {
+                    this.actor.send('clientActor', {
+                        type: 'queryOne',
+                        query: {cid: clientId}
+                    }).then(function(clientFound) {
+                        return callback(null, clientFound, redirectUri);
+                    }, function(err) {
+                        console.log(err);
+                        callback(err);
+                    });
+                }.bind(this)),
+                function(req, res, next) {
+                    //TODO: Fail to get the user object by customized way to do authentication.
+                    if (req.oauth2.client.type === 'internal') {
+                        res.status(400);
+                        res.json({success: false, msg: 'Internal client do not have to do this!'});
+                    } else {
+                        res.render('authorize', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
+                    }
+                }
+            ];
+
+            var isAuthenticated = function(req, res, next) {
+                if (!req.session.user) {
+                    // Todo: redirect to login view
+                } else {
+                    req.user = req.session.user;
+                    next();
+                }
+            };
+
+            var authenicateClient = function(req, res, next) {
+                console.log(req.body.public_key, req.body.secret_key);
+                this.actor.send('clientActor', {
+                    type: 'queryOne',
+                    query: {public_key: req.body.public_key}
+                }).then(function(clientFound) {
+                    if (clientFound) {
+console.log(clientFound);
+                        if (clientFound.secret_key === req.body.secret_key) {
+                            req.client = clientFound;
+console.log('ok');
+                            next();
+                        } else {
+                            res.status(401);
+                            res.json({success: false, msg: 'The keys is invalid!'});
+                            return;
+                        }
+                    } else {
+                        res.status(401);
+                        res.json({success: false, msg: 'The keys is invalid!'});
+                        return;
+                    }
+                }, function(err) {
+                    res.status(500);
+                    res.json({success: false, msg: 'Internal error!'});
+                    return;
+                });
+
+            }.bind(this);
+
             /****************  OAuth Server  ********************/
 
             /****************************************************
              ***************  OAuth Endpoint  *******************
              ****************************************************/
-            // /authorize get
+            // /authorize-signin get
             this.actor.send('apiActor', {
                 type: 'route',
                 request: {
                     method: 'GET',
                     url: '/oauth/authorize',
+                    handlers: auth
+                }
+            });
+
+            // /signin post
+            this.actor.send('apiActor', {
+                type: 'route',
+                request: {
+                    method: 'POST',
+                    url: '/oauth/signin',
                     handlers: authorize
                 }
             });
@@ -302,19 +338,10 @@ console.log(user);
                 request: {
                     method: 'POST',
                     url: '/oauth/authorize',
-                    handlers: [server.decision()]
+                    handlers: [isAuthenticated, server.decision()]
                 }
             });
 
-            // /signin post
-            this.actor.send('apiActor', {
-                type: 'route',
-                request: {
-                    method: 'POST',
-                    url: '/oauth/signin',
-                    handlers: [signInHandler]
-                }
-            });
 
             // /token post
             this.actor.send('apiActor', {
@@ -322,7 +349,7 @@ console.log(user);
                 request: {
                     method: 'POST',
                     url: '/oauth/token',
-                    handlers: [internalClientAuthorize, server.token(), server.errorHandler()]
+                    handlers: [authenicateClient, server.token(), server.errorHandler()]
                 }
             });
             /****************  OAuth Endpoint  ******************/

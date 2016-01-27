@@ -46,8 +46,10 @@
                 code: {type: String, required: false},
                 type: {type: String, required: true},
                 name: {type: String, required: true},
-                public_key: {type: String, unique: true, required: false},
-                secret_key: {type: String, required: false},
+                email: {type: String, unique: true, required: true},
+                password: {type: String, required: true},
+                public_key: {type: String, unique: true, required: true},
+                secret_key: {type: String, required: true},
                 created_at: { type: Date, required: true }
             };
 
@@ -63,17 +65,14 @@
                                 cid: uid(10),
                                 type: req.body.type,
                                 name: req.body.name,
-                                created_at: new Date()
+                                created_at: new Date(),
+                                public_key: uid(32),
+                                secret_key: uid(32),
+                                email: req.body.email,
+                                password: req.body.password
                             };
 
                             var type = req.body.type;
-                            if (type === 'internal') {
-                                newClient.public_key = uid(32);
-                                newClient.secret_key = uid(32);
-                            } else {
-                                newClient.public_key = req.body.username;
-                                newClient.secret_key = req.body.password;
-                            }
 
                             if (type === 'internal') {
                                 this.actor.send('oauthActor', {

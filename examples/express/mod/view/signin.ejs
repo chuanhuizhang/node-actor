@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+    <head></head>
+    <body>
+        <div id="sign-in-view">
+            Please sign in to authorize third party to access you data!</br>
+            <form action="/oauth/signin?client_id=<%= query.client_id %>&response_type=<%= query.response_type %>&redirect_uri=<%= query.redirect_uri %>" method="post">
+                <input type="text" name="email" placeholder="Email" id="email"/><br/>
+                <input type="password" name="password" placeholder="Password" id="password"/></br>
+                <button id="sign-in-btn">Sign In</button>
+            </form>
+        </div>
+
+    </body>
+</html>

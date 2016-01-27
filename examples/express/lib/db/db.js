@@ -32,6 +32,11 @@
                             if (err) promise.reject(err);
                             promise.resolve(item);
                         });
+                    } else if (message.type === 'removeOne') {
+                        _models[message.name].findOneAndRemove(message.query, function(err, result) {
+                            if (err) promise.reject(err);
+                            promise.resolve(result);
+                        });
                     }
                 }
             });
