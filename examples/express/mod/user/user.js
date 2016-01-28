@@ -1,5 +1,7 @@
 (function() {
     var CZ = require('cz-actor');
+    var UserForm = require('./userForm');
+    var UserCtrl = require('./userCtrl');
 
     var User = (function() {
         function User() {
@@ -15,6 +17,9 @@
                     }
                 }.bind(this)
             });
+            this.form = new UserForm(this.actor);
+            this.ctrl = new UserCtrl(this.actor);
+
             this.initialize();
         }
 
@@ -27,6 +32,7 @@
                 lastname: {'type': String, required: true },
                 created_at: { type: Date, required: true }
             };
+
 
             // /users get
             this.actor.send('apiActor', {
@@ -52,18 +58,7 @@
                 request: {
                     method: 'POST',
                     url: '/users',
-                    handlers: [
-                        function(req, res, next) {
-                            var data = req.body;
-                            data.created_at = new Date();
-                            this.actor.send('dbActor', {type: 'create', name: 'User', data: data}).then(function(results) {
-                                res.json({success: true, user: results});
-                            }, function(err) {
-                                res.status(500);
-                                res.json({success: false});
-                            });
-                        }.bind(this)
-                    ]
+                    handlers: [this.form.create, this.ctrl.create]
                 }
             });
         }

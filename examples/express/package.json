@@ -15,6 +15,7 @@
     "express": "^4.13.3",
     "express-session": "^1.13.0",
     "mongoose": "^4.3.6",
-    "oauth2orize": "^1.2.1"
+    "oauth2orize": "^1.2.1",
+    "validator": "^4.5.2"
   }
 }
