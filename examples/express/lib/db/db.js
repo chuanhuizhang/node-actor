@@ -5,6 +5,7 @@
     var db = mongoose.connection;
 
     var _models = {}
+    var _schema = {}
 
     var Db = (function(){
         function Db() {
@@ -14,6 +15,7 @@
                     if (message.type === 'schema') {
                         var Schema = new mongoose.Schema(message.schema);
                         var model = db.model(message.name, Schema);
+                        _schema[message.name] = Schema;
                         _models[message.name] = model;
                         promise.resolve(model);
                     } else if (message.type === 'query') {
