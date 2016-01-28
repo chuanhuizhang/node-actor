@@ -9,6 +9,7 @@
   "author": "Chuanhui Zhang",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.3.0",
     "body-parser": "^1.14.2",
     "cz-actor": "git+https://github.com/cz-Michael/node-actor.git",
     "ejs": "^2.4.1",

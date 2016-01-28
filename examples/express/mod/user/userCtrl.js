@@ -1,5 +1,6 @@
 (function() {
 
+    var bcrypt = require('bcryptjs');
     var userActor = null;
 
     var UserCtrl = (function() {
@@ -23,7 +24,11 @@
         UserCtrl.prototype.create = function(req, res, next) {
             var data = req.body;
             data.created_at = new Date();
+
+            data.password = bcrypt.hashSync(data.password, bcrypt.genSaltSync(10));
+
             userActor.send('dbActor', {type: 'create', name: 'User', data: data}).then(function(userCreated) {
+                userCreated.password = undefined;
                 res.json({success: true, user: userCreated});
             }, function(err) {
                 abort(res, 500, err.errmsg);
